@@ -4,15 +4,20 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/mail"
+	"net/textproto"
 	"strings"
 	"testing"
 
 	"google.golang.org/api/gmail/v1"
 
 	"github.com/openclaw/gogcli/internal/app"
+	"github.com/openclaw/gogcli/internal/gmailcontent"
 )
 
 // mockReplySourceMessage returns a gmail.Message JSON payload suitable as the
@@ -170,6 +175,51 @@ func rawMessageHeader(t *testing.T, raw, name string) string {
 		t.Fatalf("parse raw message: %v\nraw:\n%s", err, raw)
 	}
 	return msg.Header.Get(name)
+}
+
+// rawTextPart returns the decoded body of the first mediaType part of a raw
+// MIME message, searching nested multiparts, so tests can assert the text a
+// reader sees rather than its quoted-printable encoding.
+func rawTextPart(t *testing.T, raw, mediaType string) string {
+	t.Helper()
+	msg, err := mail.ReadMessage(strings.NewReader(raw))
+	if err != nil {
+		t.Fatalf("parse raw message: %v\nraw:\n%s", err, raw)
+	}
+	body, ok := findTextPart(textproto.MIMEHeader(msg.Header), msg.Body, mediaType)
+	if !ok {
+		t.Fatalf("no %s part in raw message:\n%s", mediaType, raw)
+	}
+	return body
+}
+
+func findTextPart(header textproto.MIMEHeader, body io.Reader, want string) (string, bool) {
+	mediaType, params, err := mime.ParseMediaType(header.Get("Content-Type"))
+	if err != nil {
+		return "", false
+	}
+	if strings.HasPrefix(mediaType, "multipart/") {
+		reader := multipart.NewReader(body, params["boundary"])
+		for {
+			part, nextErr := reader.NextPart()
+			if nextErr != nil {
+				return "", false
+			}
+			if text, ok := findTextPart(part.Header, part, want); ok {
+				return text, true
+			}
+		}
+	}
+	if mediaType != want {
+		return "", false
+	}
+	data, err := io.ReadAll(body)
+	if err != nil {
+		return "", false
+	}
+	// multipart.Part decodes quoted-printable itself and hides the header; a
+	// single-part message still carries it.
+	return string(gmailcontent.DecodeTransferEncoding(data, header.Get("Content-Transfer-Encoding"))), true
 }
 
 // wantAddr is one expected recipient (display name + address) for

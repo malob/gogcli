@@ -11,7 +11,9 @@ const (
 	listDateLayout = "2006-01-02 15:04"
 	// quoteDateLayout renders dates in the Gmail-style human form used for reply
 	// attributions and forwarded-message headers, e.g. "Wed, Jun 17, 2026 at 12:29 AM".
-	quoteDateLayout = "Mon, Jan 2, 2006 at 3:04 PM"
+	// Like Gmail, it puts a narrow no-break space (U+202F), not an ASCII space,
+	// before AM/PM.
+	quoteDateLayout = "Mon, Jan 2, 2006 at 3:04\u202fPM"
 )
 
 // formatMailDateInLocation parses an RFC 2822 Date header and renders it with

@@ -118,7 +118,7 @@ func TestExecute_GmailForward_Basic(t *testing.T) {
 		t.Errorf("expected original From in forwarded body")
 	}
 	// Original Date (09:00 -0400) reformatted to Gmail style in UTC.
-	if !strings.Contains(sentRaw, "Date: Tue, Mar 10, 2026 at 1:00 PM") {
+	if !strings.Contains(rawTextPart(t, sentRaw, "text/plain"), "Date: Tue, Mar 10, 2026 at 1:00\u202fPM") {
 		t.Errorf("expected reformatted original Date in forwarded body")
 	}
 
@@ -331,7 +331,7 @@ func TestFormatForwardedMessage(t *testing.T) {
 		"---------- Forwarded message ---------",
 		"From: Alice <alice@example.com>",
 		// 09:00 -0400 rendered in UTC; weekday is recomputed (Mar 10 2026 is a Tue).
-		"Date: Tue, Mar 10, 2026 at 1:00 PM",
+		"Date: Tue, Mar 10, 2026 at 1:00\u202fPM",
 		"Subject: Test Subject",
 		"To: bob@example.com",
 		"Cc: carol@example.com",
@@ -372,7 +372,7 @@ func TestFormatForwardedMessageHTML(t *testing.T) {
 		t.Error("missing note in HTML")
 	}
 	// Date (09:00 -0400) reformatted to Gmail style in UTC.
-	if !strings.Contains(result, "Tue, Mar 10, 2026 at 1:00 PM") {
+	if !strings.Contains(result, "Tue, Mar 10, 2026 at 1:00\u202fPM") {
 		t.Errorf("missing reformatted date in HTML, got:\n%s", result)
 	}
 	if !strings.Contains(result, "Forwarded message") {
