@@ -3,6 +3,7 @@
 ## 0.45.1 - Unreleased
 
 - Dependencies: update Vitest and Cloudflare Workers types within the worker’s 24-hour release cooldown.
+- Gmail: add `--note-html` and `--note-html-file` to forwards and preserve plain-note line breaks in HTML output. (#1215) — thanks @malob.
 
 - Auth: accept `gog auth <email>` as shorthand for `gog auth add <email>`; bare `gog auth` and mistyped subcommands keep their existing errors. (#1221)
 
