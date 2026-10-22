@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"html"
 	"net/mail"
 	"strings"
 	"time"
@@ -291,11 +290,6 @@ func deduplicateAddresses(addresses []string) []string {
 		}
 	}
 	return result
-}
-
-func escapeTextToHTML(value string) string {
-	value = html.EscapeString(value)
-	return strings.ReplaceAll(value, "\n", "<br>\n")
 }
 
 func applyQuoteToBodies(plainBody string, htmlBody string, quote bool, info *replyInfo, loc *time.Location) (string, string) {
