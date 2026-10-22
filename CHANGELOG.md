@@ -3,6 +3,7 @@
 ## 0.46.1 - Unreleased
 
 - Security: upgrade Alpine's default CA packages in Docker image build and runtime stages to reject the compromised eMudhra certificate chains. (#1244) — thanks @joshavant.
+- Gmail: keep a reply's "On … wrote:" line and a forward's header block readable next to right-to-left text: the line is marked left-to-right, and each name, address, date and subject taken from the original keeps its own direction. Quotes also carry Gmail's `gmail_quote_container` and `gmail_attr` classes. (#1250) — thanks @malob.
 
 ## 0.46.0 - 2026-10-20
 
