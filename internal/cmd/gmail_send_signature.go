@@ -52,12 +52,17 @@ func (s composeSignature) plainBlock() string {
 	return "--\n" + strings.TrimSpace(s.Plain)
 }
 
+// gmailSignatureOpen opens the block that holds a signature in an HTML body,
+// with Gmail's class. dir="auto" gives the signature the direction of its own
+// first letter, whatever the body's.
+const gmailSignatureOpen = `<div dir="auto" class="gmail_signature">`
+
 // htmlBlock is the signature as appended to an HTML body, or "" when empty.
 func (s composeSignature) htmlBlock() string {
 	if strings.TrimSpace(s.HTML) == "" {
 		return ""
 	}
-	return `<div class="gmail_signature">` + strings.TrimSpace(s.HTML) + `</div>`
+	return gmailSignatureOpen + strings.TrimSpace(s.HTML) + `</div>`
 }
 
 // requestedSignature resolves the signature the signature flags ask for. It
@@ -133,7 +138,7 @@ func readComposeSignatureFile(path string) (composeSignature, error) {
 	}
 	return composeSignature{
 		Plain: value,
-		HTML:  escapeTextToHTML(value),
+		HTML:  directedTextToHTML(value),
 	}, nil
 }
 
